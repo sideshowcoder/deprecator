@@ -1,6 +1,4 @@
-require_relative "./test_helper"
+require "test_helper"
 
 describe Deprecator do
-  it "loads" do
-  end
 end
