@@ -15,11 +15,11 @@ module Deprecator
     end
 
     def version_hook
-      self.class.__ensured.each { |expected_version, callbacks|
+      self.class.__ensured.each do |expected_version, callbacks|
         if version < expected_version
           callbacks.each { |cb| self.send cb, expected_version }
         end
-      }
+      end
     end
 
     module ClassMethods
