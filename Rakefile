@@ -15,13 +15,16 @@ def code_from_markdown file
   code_snippets
 end
 
-task :executable_docs do
-  lib = File.expand_path("../lib", __FILE__)
-  $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-  require "deprecator"
+namespace :test do
+  desc "Execute the codesamples in the README"
+  task :codesamples do
+    lib = File.expand_path("../lib", __FILE__)
+    $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+    require "deprecator"
 
-  examples = code_from_markdown("./README.md")
-  examples.each { |example|
-    eval example
-  }
+    examples = code_from_markdown("./README.md")
+    examples.each { |example|
+      eval example
+    }
+  end
 end
