@@ -27,11 +27,28 @@ describe "ensureing versions" do
   it "calls the upgrade_method on version mismatch" do
     @subject.instance_eval do
       ensure_version 2, :version_upgrade
-      define_method(:version_upgrade) do |new_version| 
+      define_method(:version_upgrade) do |new_version|
         @version = new_version
       end
     end
 
     @subject.new(version: 1).version.must_equal 2
   end
+
+  it "allows a lambda to be passed as the upgrade handler" do
+    @subject.instance_eval do
+      ensure_version 2, ->(new_version) { @version = new_version }
+    end
+
+    @subject.new(version: 1).version.must_equal 2
+  end
+
+  it "allows a block to be passed as the upgrade handler" do
+    @subject.instance_eval do
+      ensure_version(2) { |expected_version| @version = expected_version }
+    end
+
+    @subject.new(version: 1).version.must_equal 2
+  end
+
 end
