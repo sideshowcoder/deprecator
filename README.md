@@ -132,19 +132,30 @@ end
 assert Example.new(1).my_version == 10, "version by function failed"
 ```
 
-### Global Missmatch Hook
+### Global Hook
 Whenever a missmatch triggers any callback this hook is called as well, this is
 great for logging and development but be carefull this can result in a lot of
 calls.
 
-```xruby
-Deprecator.register_missmatch_hook :version_missmatch
+```ruby
+$global_hook_was_triggered = false
 
-def version_missmatch object, current, expected
-  puts "Global missmatch hook triggered version #{current}, expected #{expected}"
+Deprecator.register_global_hook do |object, current_version, expected_version|
+  $global_hook_was_triggered = true
+end
+
+class Example
+  def initialize version
+    @version = version
+  end
+  attr_accessor :version
+
+  include Deprecator::Versioning
+  ensure_version 2
 end
 
 Example.new(1)
+assert $global_hook_was_triggered, "global hook was not triggered"
 ```
 
 ## Contributing

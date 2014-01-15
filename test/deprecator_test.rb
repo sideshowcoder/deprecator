@@ -1,6 +1,6 @@
 require "test_helper"
 
-describe Deprecator::Versioning do
+describe Deprecator do
   subject do
     Class.new do
       attr_reader :version
@@ -90,6 +90,42 @@ describe Deprecator::Versioning do
       # sure that the call does not happen because of an unset default version
       # property
       subject.new(version: 2, my_version: 1).called.must_equal true
+    end
+  end
+
+  describe "#register_global_hook" do
+    subject do
+      Class.new do
+        attr_reader :version
+
+        def initialize args
+          args.each { |k, v| self.instance_variable_set "@#{k}", v }
+        end
+
+        include Deprecator::Versioning
+        ensure_version 2
+      end
+    end
+
+    after do
+      Deprecator.reset_global_hooks!
+    end
+
+    it "calls the registered missmatch hook for in case of a missmatch" do
+      called_global_hook = false
+      Deprecator.register_global_hook do |object, current, expected|
+        called_global_hook = true
+      end
+      subject.new(version: 1)
+      called_global_hook.must_equal true
+    end
+
+    it "triggers callable objects as well" do
+      mock = MiniTest::Mock.new
+      mock.expect :call, nil, [subject, 1, 2]
+      Deprecator.register_global_hook mock
+      subject.new(version: 1)
+      mock.verify
     end
   end
 end
