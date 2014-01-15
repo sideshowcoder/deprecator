@@ -1,7 +1,7 @@
 require "bundler/gem_tasks"
 require "rake/testtask"
 
-task default: :test
+task default: ["test", "test:codesamples"]
 
 Rake::TestTask.new do |t|
   t.libs << 'test'
@@ -23,8 +23,9 @@ namespace :test do
     require "deprecator"
 
     examples = code_from_markdown("./README.md")
-    examples.each { |example|
-      eval example
-    }
+    examples.each do |example|
+      fork { eval example }
+      Process.wait
+    end
   end
 end

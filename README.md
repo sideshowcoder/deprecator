@@ -5,7 +5,7 @@ with the different versions loaded. This allows for Objects representing Data
 allow for Dataupgrades to happen in case the implicit Datamodel changed.
 
 ```ruby
-class ExampleOne
+class Example
   def initialize version
     @version = version
   end
@@ -26,7 +26,7 @@ class ExampleOne
   end
 end
 
-ExampleOne.new(1)
+Example.new(1)
 ```
 
 This will ensure that whenever an instance of ```Thing``` is initialized the
@@ -66,7 +66,7 @@ afterwards.
 Make sure the version attribute of the object matches at least the given number
 
 ```ruby
-class ExampleTwo
+class Example
   def initialize version
     @version = version
   end
@@ -82,7 +82,7 @@ class ExampleTwo
   end
 end
 
-ExampleTwo.new(1)
+Example.new(1)
 ```
 
 ### Exact Version
@@ -90,8 +90,8 @@ ExampleTwo.new(1)
 Version attribute has to match the given number exactly, any lower or higher
 will result in the missmatch function to be called
 
-```xruby
-class ExampleThree
+```ruby
+class Example
   def initialize version
     @version = version
   end
@@ -99,7 +99,7 @@ class ExampleThree
   attr_accessor :version
 
   include Deprecator::Versioning
-  exact_match_version 2, :missmatch
+  match_version 2, :missmatch
 
   def missmatch expected_version
     # handle the missmatch
@@ -107,7 +107,7 @@ class ExampleThree
   end
 end
 
-ExampleThree.new(3)
+Example.new(3)
 ```
 
 ### Version property
@@ -115,7 +115,7 @@ The object attribute to be used as a version, this defaults to object.version
 but can be any other property or a combination by using a lambda or function
 
 ```xruby
-class ExampleFour
+class Example
   def initialize version
     @my_version = version
   end
@@ -134,7 +134,7 @@ class ExampleFour
   end
 end
 
-ExampleFour.new(1)
+Example.new(1)
 ```
 
 ### Global Missmatch Hook
@@ -149,7 +149,7 @@ def version_missmatch object, current, expected
   puts "Global missmatch hook triggered version #{current}, expected #{expected}"
 end
 
-ExampleOne.new(1)
+Example.new(1)
 ```
 
 ## Contributing
