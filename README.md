@@ -16,17 +16,16 @@ class Example
   ensure_version 2, :upgrade_to
 
   def upgrade_to expected_version
-    puts "current version #{version} expected #{expected_version} upgrading..."
     @version = expected_version
     save
   end
 
   def save
-    puts "saving new version #{version}"
+    # time to save the upgraded object
   end
 end
 
-Example.new(1)
+assert Example.new(1).version == 2, "version upgrade failed"
 ```
 
 This will ensure that whenever an instance of ```Thing``` is initialized the
@@ -78,11 +77,11 @@ class Example
 
   def upgrade_to expected_version
     # upgrade code goes here
-    puts "upgrading from #{version} to #{expected_version}"
+    @version = expected_version
   end
 end
 
-Example.new(1)
+assert Example.new(1).version == 2, "version upgrade failed"
 ```
 
 ### Exact Version
@@ -103,11 +102,11 @@ class Example
 
   def missmatch expected_version
     # handle the missmatch
-    puts "version missmatch got #{version} expected #{expected_version}"
+    @version = expected_version
   end
 end
 
-Example.new(3)
+assert Example.new(3).version == 2, "version matching failed"
 ```
 
 ### Version property
