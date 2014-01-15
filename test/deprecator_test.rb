@@ -71,4 +71,25 @@ describe Deprecator::Versioning do
       subject.new(version: 3).version.must_equal 2
     end
   end
+
+  describe "#version_by" do
+    before do
+      subject.instance_eval do
+        attr_reader :called
+        ensure_version 2, :version_upgrade
+        define_method(:version_upgrade) { |_| @called = true }
+      end
+    end
+
+    it "allows versioning by a custom property" do
+      subject.instance_eval do
+        attr_accessor :my_version
+        version_by :my_version
+      end
+      # pass both version an my_version with a matching version so we can be
+      # sure that the call does not happen because of an unset default version
+      # property
+      subject.new(version: 2, my_version: 1).called.must_equal true
+    end
+  end
 end

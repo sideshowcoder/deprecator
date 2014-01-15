@@ -111,29 +111,25 @@ assert Example.new(3).version == 2, "version matching failed"
 
 ### Version property
 The object attribute to be used as a version, this defaults to object.version
-but can be any other property or a combination by using a lambda or function
+but can be remapped to a different attribute or function
 
-```xruby
+```ruby
 class Example
   def initialize version
     @my_version = version
   end
+  attr_accessor :my_version
+
   include Deprecator::Versioning
-
-  version_by :incremented_version
-
+  version_by :my_version
   ensure_version 10, :upgrade_to
 
-  def incremented_version
-    puts "custom version function called"
-    my_version + 3
-  end
-
   def upgrade_to expected
+    @my_version = expected
   end
 end
 
-Example.new(1)
+assert Example.new(1).my_version == 10, "version by function failed"
 ```
 
 ### Global Missmatch Hook
