@@ -9,8 +9,8 @@ Rake::TestTask.new do |t|
 end
 
 # extract code from markdown file
-#  matches on ```ruby
-#  to ignora a sample use ```xruby
+# matches on ```ruby
+# to ignora a sample use ```xruby
 def code_from_markdown file
   content = File.read(file)
   code_snippets = []

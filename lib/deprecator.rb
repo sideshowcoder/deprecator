@@ -1,20 +1,51 @@
 require "deprecator/version"
 
 module Deprecator
+  # = Add data version handling to a ruby object
+  #
+  # Deprecator adds implicit calls to upgrade methods in case of a +version+
+  # missmatch for a given object. The missmatch is defined as that the
+  # +@version+ property of a given object does not match the specified ones
+  #
+  #   class Thing
+  #     def initialize version
+  #       @version = version
+  #     end
+  #
+  #     include Deprecator::Versioning
+  #     ensure_version 2 do |expected|
+  #        puts "Missmatch: #{expected} was expected, #{version} given for #{self}"
+  #     end
+  #   end
+  #
+  # == Caveat
+  # It works by hooking initialize so it must be included after an initialize
+  # method is defined
 
+
+  ##
+  # Register a global hook to be called on any version missmatch
+  # either pass a lambda or a block to be executed
   def self.register_global_hook callback = nil, &block
     global_hooks << callback if callback
     global_hooks << block if block_given?
   end
 
+  ##
+  # Delete all registerd version hooks
   def self.reset_global_hooks!
     @global_hooks = []
   end
 
+  ##
+  # Show current registerd hooks
   def self.global_hooks
     @global_hooks ||= []
   end
 
+  ##
+  # Run each global hook with the passed parameters
+  # This is called automatically on version missmatch by the missmatched object
   def self.run_global_hooks object, current_version, expected_version
     global_hooks.each do |hook|
       hook.call object, current_version, expected_version
@@ -22,6 +53,13 @@ module Deprecator
   end
 
   module Versioning
+    # = Deprecator::Versioning
+    #
+    # handle the core versioning logic
+
+    ##
+    # Included callback
+    # hooks the initialize method for a given object
     def self.included base
       base.extend ClassMethods
 
@@ -34,6 +72,9 @@ module Deprecator
       end
     end
 
+    ##
+    # Versioning logic
+    # Run any registerd hooks, as well as global hooks as needed
     def version_hook
       self.class.__ensured.each do |expected_version, callbacks|
         if current_version < expected_version
@@ -65,6 +106,13 @@ module Deprecator
     end
 
     module ClassMethods
+
+      ##
+      # ensure an object is at a given version
+      # registers a callback to be called if the current object version is less
+      # than the one ensured.
+      # The callback can either be a lambda, block or symbol to reference a
+      # method on the object.
       def ensure_version expected_version, upgrade_method = nil, &block
         if block_given?
           __ensured[expected_version] << block
@@ -77,6 +125,12 @@ module Deprecator
         end
       end
 
+      ##
+      # ensure an object has a certain version registers a callback to be
+      # called if the current object version is not exactly than the one
+      # matched.
+      # The callback can either be a lambda, block or symbol to reference a
+      # method on the object.
       def match_version expected_version, missmatch_method = nil, &block
         if block_given?
           __matched[expected_version] << block
@@ -89,11 +143,14 @@ module Deprecator
         end
       end
 
+      ##
+      # Specify which object property should be used to determine the version
       def version_by property
         @__version_property = property
       end
 
-      # Internal handling for storing the hook callbacks
+      ##
+      # Private: Internal handling for storing the hook callbacks
       def __versions
         @__versions ||= {
           ensured: Hash.new { |hash, key| hash[key] = [] },
@@ -101,14 +158,20 @@ module Deprecator
         }
       end
 
+      ##
+      # Private: reference to the version property
       def __version_property
         @__version_property ||= :version
       end
 
+      ##
+      # Private: reference to the ensured versions
       def __ensured
         __versions[:ensured]
       end
 
+      ##
+      # Private: reference to the matched versions
       def __matched
         __versions[:matched]
       end
